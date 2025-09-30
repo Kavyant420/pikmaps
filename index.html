@@ -1,0 +1,1616 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pik Maps - Modern Interactive Mapping</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        /* Modern Design System */
+        :root {
+            /* Soothing Color Palette */
+            --primary: #6366f1;
+            --primary-light: #a5b4fc;
+            --primary-dark: #4f46e5;
+            --secondary: #10b981;
+            --accent: #f59e0b;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #06b6d4;
+            
+            /* Neutral Colors */
+            --white: #ffffff;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            
+            /* Shadows */
+            --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+            --shadow-medium: 0 4px 6px rgba(0, 0, 0, 0.05), 0 2px 4px rgba(0, 0, 0, 0.06);
+            --shadow-large: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1), 0 10px 10px rgba(0, 0, 0, 0.04);
+            
+            /* Gradients */
+            --gradient-primary: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            --gradient-secondary: linear-gradient(135deg, var(--secondary) 0%, #34d399 100%);
+            --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+            
+            /* Border Radius */
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+            --radius-full: 9999px;
+            
+            /* Transitions */
+            --transition-fast: all 0.15s ease-out;
+            --transition-normal: all 0.3s ease-out;
+            --transition-slow: all 0.5s ease-out;
+        }
+
+        /* Reset & Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+            height: 100vh;
+            color: var(--gray-700);
+            line-height: 1.6;
+        }
+
+        /* Smooth animations */
+        * {
+            transition: var(--transition-fast);
+        }
+
+        /* Main Container */
+        .app-container {
+            display: flex;
+            height: 100vh;
+            position: relative;
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            margin: 12px;
+            box-shadow: var(--shadow-xl);
+            overflow: hidden;
+            backdrop-filter: blur(20px);
+        }
+
+        /* Header */
+        .header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--gray-200);
+            padding: 16px 24px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: var(--transition-normal);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 24px;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo i {
+            font-size: 32px;
+            color: var(--primary);
+            filter: drop-shadow(0 2px 4px rgba(99, 102, 241, 0.3));
+        }
+
+        .search-container {
+            position: relative;
+            flex: 1;
+            max-width: 500px;
+            margin: 0 24px;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 14px 52px 14px 20px;
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-full);
+            font-size: 15px;
+            background: var(--white);
+            transition: var(--transition-normal);
+            box-shadow: var(--shadow-soft);
+            font-weight: 400;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1), var(--shadow-medium);
+            transform: translateY(-1px);
+        }
+
+        .search-box::placeholder {
+            color: var(--gray-400);
+        }
+
+        .search-btn {
+            position: absolute;
+            right: 4px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--gradient-primary);
+            color: var(--white);
+            border: none;
+            border-radius: var(--radius-full);
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition-normal);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .search-btn:hover {
+            transform: translateY(-50%) scale(1.05);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .search-btn:active {
+            transform: translateY(-50%) scale(0.98);
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+         * { 
+    -webkit-tap-highlight-color: transparent; 
+    margin: 0; 
+    padding: 0; 
+    box-sizing: border-box; 
+} 
+
+input:focus, select:focus, textarea:focus, button:focus { 
+    outline: none; 
+    box-shadow: none; 
+    -webkit-box-shadow: none; 
+}
+
+        .control-btn {
+            padding: 10px 16px;
+            background: var(--white);
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: var(--transition-normal);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--gray-600);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .control-btn:hover {
+            background: var(--gray-50);
+            border-color: var(--gray-400);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .control-btn.active {
+            background: var(--gradient-primary);
+            color: var(--white);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 320px;
+            background: var(--white);
+            border-right: 1px solid var(--gray-200);
+            margin-top: 73px;
+            height: calc(100vh - 97px);
+            overflow-y: auto;
+            z-index: 999;
+            transition: var(--transition-normal);
+            scrollbar-width: thin;
+            scrollbar-color: var(--gray-300) transparent;
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--gray-300);
+            border-radius: var(--radius-full);
+        }
+
+        .sidebar.collapsed {
+            width: 0;
+            overflow: hidden;
+        }
+
+        .sidebar-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--gray-200);
+            background: linear-gradient(135deg, var(--gray-50) 0%, var(--white) 100%);
+        }
+
+        .sidebar-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-bottom: 8px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .sidebar-subtitle {
+            color: var(--gray-500);
+            font-size: 14px;
+            font-weight: 400;
+        }
+
+        .feature-section {
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+        .feature-header {
+            padding: 20px 24px;
+            background: var(--white);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: var(--transition-normal);
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+        .feature-header:hover {
+            background: var(--gray-50);
+        }
+
+        .feature-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--gray-700);
+        }
+
+        .feature-header i {
+            color: var(--primary);
+            width: 20px;
+            text-align: center;
+        }
+
+        .feature-content {
+            padding: 0 24px 20px 24px;
+            display: none;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .feature-content.active {
+            display: block;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .layer-control {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+        .layer-control:last-child {
+            border-bottom: none;
+        }
+
+        .layer-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .layer-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: var(--white);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .layer-icon.satellite { 
+            background: linear-gradient(135deg, var(--secondary) 0%, #34d399 100%);
+        }
+        .layer-icon.terrain { 
+            background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+        }
+        .layer-icon.dark { 
+            background: linear-gradient(135deg, var(--gray-700) 0%, var(--gray-600) 100%);
+        }
+
+        .layer-details h4 {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 4px;
+            color: var(--gray-700);
+        }
+
+        .layer-details p {
+            font-size: 12px;
+            color: var(--gray-500);
+        }
+
+        .toggle-switch {
+            width: 48px;
+            height: 26px;
+            background: var(--gray-300);
+            border-radius: var(--radius-full);
+            position: relative;
+            cursor: pointer;
+            transition: var(--transition-normal);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .toggle-switch.active {
+            background: var(--gradient-primary);
+            box-shadow: inset 0 2px 4px rgba(99, 102, 241, 0.3);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 22px;
+            height: 22px;
+            background: var(--white);
+            border-radius: var(--radius-full);
+            transition: var(--transition-normal);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .toggle-switch.active::after {
+            left: 24px;
+            box-shadow: var(--shadow-medium);
+        }
+
+        /* Map Container */
+        .map-container {
+            flex: 1;
+            position: relative;
+            margin-top: 73px;
+            background: var(--gray-100);
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+            border-radius: 0;
+        }
+
+        /* Floating Controls */
+        .map-controls {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 1000;
+        }
+
+        .map-control-group {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-large);
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .map-control-btn {
+            width: 48px;
+            height: 48px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: var(--gray-600);
+            transition: var(--transition-normal);
+            border-bottom: 1px solid rgba(229, 231, 235, 0.5);
+        }
+
+        .map-control-btn:last-child {
+            border-bottom: none;
+        }
+
+        .map-control-btn:hover {
+            background: var(--gray-50);
+            color: var(--primary);
+            transform: scale(1.05);
+        }
+
+        .map-control-btn.active {
+            background: var(--gradient-primary);
+            color: var(--white);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Location Panel */
+        .location-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 380px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-xl);
+            padding: 24px;
+            transform: translateY(100%);
+            transition: var(--transition-slow);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            z-index: 1000;
+        }
+
+        .location-panel.active {
+            transform: translateY(0);
+        }
+
+        .location-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .location-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--gray-800);
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: var(--gray-500);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: var(--radius-md);
+            transition: var(--transition-normal);
+        }
+
+        .close-btn:hover {
+            color: var(--gray-700);
+            background: var(--gray-100);
+        }
+
+        .location-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+        }
+
+        .detail-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--gradient-primary);
+            color: var(--white);
+            border-radius: var(--radius-md);
+            font-size: 12px;
+        }
+
+        .location-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--gray-300);
+            background: var(--white);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: var(--transition-normal);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: var(--gray-600);
+        }
+
+        .action-btn.primary {
+            background: var(--gradient-primary);
+            color: var(--white);
+            border-color: var(--primary);
+        }
+
+        .action-btn:hover {
+            background: var(--gray-50);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .action-btn.primary:hover {
+            background: var(--primary-dark);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+        }
+
+        /* Search Results */
+        .search-results {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-xl);
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            z-index: 1001;
+            display: none;
+            animation: fadeInUp 0.3s ease-out;
+        }
+
+        .search-results.active {
+            display: block;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .search-result-item {
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(229, 231, 235, 0.3);
+            cursor: pointer;
+            transition: var(--transition-normal);
+        }
+
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+
+        .search-result-item:hover {
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .result-title {
+            font-weight: 500;
+            color: var(--gray-800);
+            margin-bottom: 4px;
+        }
+
+        .result-address {
+            font-size: 13px;
+            color: var(--gray-500);
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            padding: 16px 20px;
+            border-radius: var(--radius-lg);
+            color: var(--white);
+            font-weight: 500;
+            box-shadow: var(--shadow-xl);
+            z-index: 10000;
+            animation: slideInRight 0.4s ease-out;
+            max-width: 320px;
+            backdrop-filter: blur(20px);
+        }
+
+        .notification.success {
+            background: linear-gradient(135deg, var(--secondary) 0%, #34d399 100%);
+        }
+
+        .notification.error {
+            background: linear-gradient(135deg, var(--danger) 0%, #f87171 100%);
+        }
+
+        .notification.info {
+            background: var(--gradient-primary);
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .app-container {
+                margin: 8px;
+                border-radius: var(--radius-lg);
+            }
+
+            .header {
+                padding: 12px 16px;
+                flex-wrap: wrap;
+                gap: 12px;
+            }
+
+            .search-container {
+                order: 3;
+                flex-basis: 100%;
+                margin: 0;
+                max-width: none;
+            }
+
+            .sidebar {
+                position: absolute;
+                left: -320px;
+                top: 73px;
+                height: calc(100vh - 97px);
+                z-index: 1001;
+                box-shadow: var(--shadow-xl);
+                border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+            }
+
+            .sidebar.mobile-open {
+                left: 0;
+            }
+
+            .location-panel {
+                right: 20px;
+                bottom: 80px;
+            }
+
+            .map-controls {
+                bottom: 20px;
+                right: 20px;
+                top: auto;
+                flex-direction: row;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            color: var(--gray-500);
+        }
+
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--gray-200);
+            border-top: 3px solid var(--primary);
+            border-radius: var(--radius-full);
+            animation: spin 1s linear infinite;
+            margin-right: 12px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Pulse Animation for Location */
+        .pulse-marker {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 0.7;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-map-marked-alt"></i>
+                Pik Maps
+            </div>
+            
+            <div class="search-container">
+                <input type="text" class="search-box" id="searchInput" placeholder="Search for places, addresses, or coordinates...">
+                <button class="search-btn" id="searchBtn">
+                    <i class="fas fa-search"></i>
+                </button>
+                <div class="search-results" id="searchResults"></div>
+            </div>
+            
+            <div class="header-controls">
+                <button class="control-btn" id="sidebarToggle">
+                    <i class="fas fa-bars"></i>
+                    <span>Menu</span>
+                </button>
+                <button class="control-btn" id="locationBtn">
+                    <i class="fas fa-location-crosshairs"></i>
+                    <span>My Location</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2 class="sidebar-title">Map Controls</h2>
+                <p class="sidebar-subtitle">Customize your mapping experience</p>
+            </div>
+            
+            <div class="sidebar-content">
+                <!-- Map Layers -->
+                <div class="feature-section">
+                    <div class="feature-header" onclick="toggleFeature('layersContent')">
+                        <h3>
+                            <i class="fas fa-layer-group"></i>
+                            Map Layers
+                        </h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="feature-content active" id="layersContent">
+                        <div class="layer-control">
+                            <div class="layer-info">
+                                <div class="layer-icon satellite">
+                                    <i class="fas fa-satellite"></i>
+                                </div>
+                                <div class="layer-details">
+                                    <h4>Satellite View</h4>
+                                    <p>High-resolution aerial imagery</p>
+                                </div>
+                            </div>
+                            <div class="toggle-switch" id="satelliteToggle" onclick="toggleSatellite()"></div>
+                        </div>
+                        
+                        <div class="layer-control">
+                            <div class="layer-info">
+                                <div class="layer-icon terrain">
+                                    <i class="fas fa-mountain"></i>
+                                </div>
+                                <div class="layer-details">
+                                    <h4>Terrain View</h4>
+                                    <p>Topographic map with elevation</p>
+                                </div>
+                            </div>
+                            <div class="toggle-switch" id="terrainToggle" onclick="toggleTerrain()"></div>
+                        </div>
+                        
+                        <div class="layer-control">
+                            <div class="layer-info">
+                                <div class="layer-icon dark">
+                                    <i class="fas fa-moon"></i>
+                                </div>
+                                <div class="layer-details">
+                                    <h4>Dark Mode</h4>
+                                    <p>Easy on the eyes at night</p>
+                                </div>
+                            </div>
+                            <div class="toggle-switch" id="darkToggle" onclick="toggleDarkMode()"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Map Tools -->
+                <div class="feature-section">
+                    <div class="feature-header" onclick="toggleFeature('toolsContent')">
+                        <h3>
+                            <i class="fas fa-tools"></i>
+                            Map Tools
+                        </h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="feature-content" id="toolsContent">
+                        <div class="layer-control">
+                            <div class="layer-info">
+                                <div class="layer-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);">
+                                    <i class="fas fa-map-pin"></i>
+                                </div>
+                                <div class="layer-details">
+                                    <h4>Add Markers</h4>
+                                    <p>Click on map to add markers</p>
+                                </div>
+                            </div>
+                            <div class="toggle-switch" id="markerToggle" onclick="toggleMarkerMode()"></div>
+                        </div>
+                        
+                        <div class="layer-control">
+                            <div class="layer-info">
+                                <div class="layer-icon" style="background: linear-gradient(135deg, #06b6d4 0%, #67e8f9 100%);">
+                                    <i class="fas fa-ruler"></i>
+                                </div>
+                                <div class="layer-details">
+                                    <h4>Measure Distance</h4>
+                                    <p>Click points to measure</p>
+                                </div>
+                            </div>
+                            <div class="toggle-switch" id="measureToggle" onclick="toggleMeasureMode()"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Map Container -->
+        <main class="map-container">
+            <div id="map"></div>
+            
+            <!-- Floating Controls -->
+            <div class="map-controls">
+                <div class="map-control-group">
+                    <button class="map-control-btn" onclick="zoomIn()" title="Zoom In">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <button class="map-control-btn" onclick="zoomOut()" title="Zoom Out">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <button class="map-control-btn" onclick="resetView()" title="Reset View">
+                        <i class="fas fa-home"></i>
+                    </button>
+                </div>
+                
+                <div class="map-control-group">
+                    <button class="map-control-btn" onclick="toggleFullscreen()" title="Fullscreen">
+                        <i class="fas fa-expand"></i>
+                    </button>
+                    <button class="map-control-btn" onclick="shareLocation()" title="Share">
+                        <i class="fas fa-share-alt"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Location Info Panel -->
+            <div class="location-panel" id="locationPanel">
+                <div class="location-header">
+                    <h3 class="location-title" id="locationTitle">Location Details</h3>
+                    <button class="close-btn" onclick="closeLocationPanel()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="location-details">
+                    <div class="detail-item">
+                        <div class="detail-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <span id="locationCoords">Coordinates</span>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-icon">
+                            <i class="fas fa-compass"></i>
+                        </div>
+                        <span id="locationAddress">Address</span>
+                    </div>
+                </div>
+                
+                <div class="location-actions">
+                    <button class="action-btn primary" onclick="getDirections()">
+                        <i class="fas fa-route"></i>
+                        Directions
+                    </button>
+                    <button class="action-btn" onclick="saveLocation()">
+                        <i class="fas fa-bookmark"></i>
+                        Save
+                    </button>
+                    <button class="action-btn" onclick="shareCurrentLocation()">
+                        <i class="fas fa-share"></i>
+                        Share
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Leaflet JavaScript -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" 
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <script>
+        // Global Variables
+        let map;
+        let currentLayer = 'street';
+        let markers = [];
+        let measurePath = [];
+        let isMarkerMode = false;
+        let isMeasureMode = false;
+        let currentPosition = null;
+        let streetLayer, satelliteLayer, terrainLayer, darkLayer;
+        let measurePolyline = null;
+
+        // Initialize Map
+        function initMap() {
+            // Create map instance
+            map = L.map('map', {
+    center: [40.7128, -74.0060], // New York City
+    zoom: 10,
+    zoomControl: false,
+    attributionControl: true,
+    maxBounds: [[-90, -180], [90, 180]], // keep inside world bounds
+    maxBoundsViscosity: 1.0,              // lock to bounds
+    minZoom: 2                            // prevent shrinking
+});
+            // Define tile layers (all free!)
+            streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 19,
+                minZoom: 2,
+                noWrap: true
+            });
+
+            satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                attribution: '© Esri, Maxar, Earthstar Geographics',
+                maxZoom: 18,
+                   minZoom: 2,
+                noWrap: true
+            });
+
+            terrainLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenTopoMap (CC-BY-SA)',
+                maxZoom: 17,
+                   minZoom: 2,
+                noWrap: true
+            });
+
+            darkLayer = L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', {
+                attribution: '© Stadia Maps © OpenMapTiles © OpenStreetMap contributors',
+                maxZoom: 20,
+                   minZoom: 2,
+                noWrap: true
+            });
+
+            // Set default layer
+            streetLayer.addTo(map);
+
+            // Map event listeners
+            map.on('click', handleMapClick);
+            map.on('locationfound', onLocationFound);
+            map.on('locationerror', onLocationError);
+
+            // Try to get user's location
+            getUserLocation();
+
+            showNotification('Map loaded successfully! 🗺️', 'success');
+        }
+
+        // Get user's current location
+        function getUserLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        currentPosition = [lat, lng];
+                        
+                        map.setView(currentPosition, 13);
+                        
+                        // Add pulsing marker for current location
+                        const lat2 = position.coords.latitude.toFixed(6);
+const lng2 = position.coords.longitude.toFixed(6);
+
+const locationMarker = L.circleMarker(currentPosition, {
+    color: '#6366f1',
+    fillColor: '#a5b4fc',
+    fillOpacity: 0.8,
+    radius: 12,
+    className: 'pulse-marker'
+}).addTo(map);
+
+locationMarker.bindPopup(`📍 ${lat2}, ${lng2}`).openPopup();
+                        
+                        showNotification('Location found! 📍', 'success');
+                    },
+                    (error) => {
+                        console.log('Location error:', error);
+                        showNotification('Could not get your location', 'error');
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 300000
+                    }
+                );
+            }
+        }
+
+        // Handle map clicks
+        function handleMapClick(e) {
+            const lat = e.latlng.lat.toFixed(6);
+            const lng = e.latlng.lng.toFixed(6);
+            
+            if (isMarkerMode) {
+                addMarker(e.latlng, `Marker at ${lat}, ${lng}`);
+                showNotification('Marker added! 📍', 'success');
+            } else if (isMeasureMode) {
+                addMeasurePoint(e.latlng);
+            } else {
+                showLocationInfo(e.latlng);
+            }
+        }
+
+        // Add marker
+        function addMarker(latlng, title) {
+            const marker = L.marker(latlng).addTo(map);
+            marker.bindPopup(title);
+            markers.push(marker);
+        }
+
+        // Show location information
+        function showLocationInfo(latlng) {
+            const lat = latlng.lat.toFixed(6);
+            const lng = latlng.lng.toFixed(6);
+            
+            document.getElementById('locationTitle').textContent = 'Selected Location';
+            document.getElementById('locationCoords').textContent = `${lat}, ${lng}`;
+            document.getElementById('locationAddress').textContent = 'Loading address...';
+            
+            // Show panel
+            document.getElementById('locationPanel').classList.add('active');
+            
+            // Reverse geocode to get address
+            reverseGeocode(lat, lng);
+        }
+
+        // Reverse geocoding using Nominatim (free!)
+        async function reverseGeocode(lat, lng) {
+            try {
+                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
+                const data = await response.json();
+                
+                if (data && data.display_name) {
+                    document.getElementById('locationAddress').textContent = data.display_name;
+                } else {
+                    document.getElementById('locationAddress').textContent = 'Address not found';
+                }
+            } catch (error) {
+                console.error('Geocoding error:', error);
+                document.getElementById('locationAddress').textContent = 'Error loading address';
+            }
+        }
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('keyup', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            } else {
+                const query = this.value.trim();
+                if (query.length > 2) {
+                    searchSuggestions(query);
+                } else {
+                    hideSearchResults();
+                }
+            }
+        });
+
+        document.getElementById('searchBtn').addEventListener('click', performSearch);
+
+        // Perform search using Nominatim
+        async function performSearch() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (!query) return;
+            
+            showNotification('Searching...', 'info');
+            
+            try {
+                const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&addressdetails=1`);
+                const data = await response.json();
+                
+                if (data && data.length > 0) {
+                    const result = data[0];
+                    const lat = parseFloat(result.lat);
+                    const lng = parseFloat(result.lon);
+                    
+                    map.setView([lat, lng], 15);
+                    addMarker([lat, lng], result.display_name);
+                    showLocationInfo({latlng: {lat, lng}});
+                    
+                    showNotification('Location found! 🎯', 'success');
+                } else {
+                    showNotification('Location not found', 'error');
+                }
+            } catch (error) {
+                console.error('Search error:', error);
+                showNotification('Search failed', 'error');
+            }
+            
+            hideSearchResults();
+        }
+
+        // Search suggestions
+        async function searchSuggestions(query) {
+            try {
+                const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`);
+                const data = await response.json();
+                
+                displaySearchResults(data);
+            } catch (error) {
+                console.error('Suggestions error:', error);
+                hideSearchResults();
+            }
+        }
+
+        // Display search results
+        function displaySearchResults(results) {
+            const container = document.getElementById('searchResults');
+            
+            if (!results || results.length === 0) {
+                hideSearchResults();
+                return;
+            }
+            
+            container.innerHTML = '';
+            
+            results.forEach(result => {
+                const item = document.createElement('div');
+                item.className = 'search-result-item';
+                item.innerHTML = `
+                    <div class="result-title">${result.display_name.split(',')[0]}</div>
+                    <div class="result-address">${result.display_name}</div>
+                `;
+                
+                item.onclick = () => {
+                    const lat = parseFloat(result.lat);
+                    const lng = parseFloat(result.lon);
+                    
+                    map.setView([lat, lng], 15);
+                    addMarker([lat, lng], result.display_name);
+                    showLocationInfo({latlng: {lat, lng}});
+                    
+                    document.getElementById('searchInput').value = result.display_name.split(',')[0];
+                    hideSearchResults();
+                };
+                
+                container.appendChild(item);
+            });
+            
+            container.classList.add('active');
+        }
+
+        function hideSearchResults() {
+            document.getElementById('searchResults').classList.remove('active');
+        }
+
+        // Layer controls
+        function toggleSatellite() {
+            const toggle = document.getElementById('satelliteToggle');
+            const isActive = toggle.classList.contains('active');
+            
+            if (isActive) {
+                map.removeLayer(satelliteLayer);
+                streetLayer.addTo(map);
+                toggle.classList.remove('active');
+                currentLayer = 'street';
+            } else {
+                map.removeLayer(streetLayer);
+                map.removeLayer(terrainLayer);
+                map.removeLayer(darkLayer);
+                satelliteLayer.addTo(map);
+                toggle.classList.add('active');
+                document.getElementById('terrainToggle').classList.remove('active');
+                document.getElementById('darkToggle').classList.remove('active');
+                currentLayer = 'satellite';
+            }
+        }
+
+        function toggleTerrain() {
+            const toggle = document.getElementById('terrainToggle');
+            const isActive = toggle.classList.contains('active');
+            
+            if (isActive) {
+                map.removeLayer(terrainLayer);
+                streetLayer.addTo(map);
+                toggle.classList.remove('active');
+                currentLayer = 'street';
+            } else {
+                map.removeLayer(streetLayer);
+                map.removeLayer(satelliteLayer);
+                map.removeLayer(darkLayer);
+                terrainLayer.addTo(map);
+                toggle.classList.add('active');
+                document.getElementById('satelliteToggle').classList.remove('active');
+                document.getElementById('darkToggle').classList.remove('active');
+                currentLayer = 'terrain';
+            }
+        }
+
+        function toggleDarkMode() {
+            const toggle = document.getElementById('darkToggle');
+            const isActive = toggle.classList.contains('active');
+            
+            if (isActive) {
+                map.removeLayer(darkLayer);
+                streetLayer.addTo(map);
+                toggle.classList.remove('active');
+                currentLayer = 'street';
+            } else {
+                map.removeLayer(streetLayer);
+                map.removeLayer(satelliteLayer);
+                map.removeLayer(terrainLayer);
+                darkLayer.addTo(map);
+                toggle.classList.add('active');
+                document.getElementById('satelliteToggle').classList.remove('active');
+                document.getElementById('terrainToggle').classList.remove('active');
+                currentLayer = 'dark';
+            }
+        }
+
+        // Tool controls
+        function toggleMarkerMode() {
+            isMarkerMode = !isMarkerMode;
+            const toggle = document.getElementById('markerToggle');
+            toggle.classList.toggle('active', isMarkerMode);
+            
+            if (isMarkerMode) {
+                isMeasureMode = false;
+                document.getElementById('measureToggle').classList.remove('active');
+                showNotification('Click on map to add markers 📍', 'info');
+            }
+        }
+
+        function toggleMeasureMode() {
+            isMeasureMode = !isMeasureMode;
+            const toggle = document.getElementById('measureToggle');
+            toggle.classList.toggle('active', isMeasureMode);
+            
+            if (isMeasureMode) {
+                isMarkerMode = false;
+                document.getElementById('markerToggle').classList.remove('active');
+                measurePath = [];
+                if (measurePolyline) {
+                    map.removeLayer(measurePolyline);
+                }
+                showNotification('Click points on map to measure distance 📏', 'info');
+            } else {
+                clearMeasurement();
+            }
+        }
+
+        // Measure distance
+        function addMeasurePoint(latlng) {
+            measurePath.push(latlng);
+            
+            // Add point marker
+            L.circleMarker(latlng, {
+                color: '#f59e0b',
+                fillColor: '#fbbf24',
+                fillOpacity: 0.8,
+                radius: 5
+            }).addTo(map);
+            
+            if (measurePath.length > 1) {
+                // Draw line
+                if (measurePolyline) {
+                    map.removeLayer(measurePolyline);
+                }
+                
+                measurePolyline = L.polyline(measurePath, {
+                    color: '#f59e0b',
+                    weight: 3,
+                    opacity: 0.8
+                }).addTo(map);
+                
+                // Calculate total distance
+                let totalDistance = 0;
+                for (let i = 1; i < measurePath.length; i++) {
+                    totalDistance += measurePath[i-1].distanceTo(measurePath[i]);
+                }
+                
+                const km = (totalDistance / 1000).toFixed(2);
+                const mi = (totalDistance / 1609.34).toFixed(2);
+                
+                showNotification(`Distance: ${km} km (${mi} mi)`, 'info');
+            }
+        }
+
+        function clearMeasurement() {
+            measurePath = [];
+            if (measurePolyline) {
+                map.removeLayer(measurePolyline);
+                measurePolyline = null;
+            }
+        }
+
+        // Map controls
+        function zoomIn() {
+            map.zoomIn();
+        }
+
+        function zoomOut() {
+            map.zoomOut();
+        }
+
+        function resetView() {
+            if (currentPosition) {
+                map.setView(currentPosition, 13);
+            } else {
+                map.setView([40.7128, -74.0060], 10);
+            }
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        function shareLocation() {
+            const center = map.getCenter();
+            const zoom = map.getZoom();
+            const url = `${window.location.origin}${window.location.pathname}#${zoom}/${center.lat}/${center.lng}`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Pik Maps Location',
+                    text: 'Check out this location!',
+                    url: url
+                });
+            } else {
+                navigator.clipboard.writeText(url).then(() => {
+                    showNotification('Location link copied! 🔗', 'success');
+                });
+            }
+        }
+
+        // Location panel controls
+        function closeLocationPanel() {
+            document.getElementById('locationPanel').classList.remove('active');
+        }
+
+        function getDirections() {
+            if (currentPosition) {
+                const panel = document.getElementById('locationPanel');
+                const coords = document.getElementById('locationCoords').textContent;
+                const [lat, lng] = coords.split(', ').map(parseFloat);
+                
+                const url = `https://www.openstreetmap.org/directions?engine=fossgis_osrm_car&route=${currentPosition[0]},${currentPosition[1]};${lat},${lng}`;
+                window.open(url, '_blank');
+            } else {
+                showNotification('Current location not available', 'error');
+            }
+        }
+
+        function saveLocation() {
+            const coords = document.getElementById('locationCoords').textContent;
+            const address = document.getElementById('locationAddress').textContent;
+            
+            const savedLocations = JSON.parse(localStorage.getItem('pikMapsLocations') || '[]');
+            savedLocations.push({ coords, address, timestamp: Date.now() });
+            localStorage.setItem('pikMapsLocations', JSON.stringify(savedLocations));
+            
+            showNotification('Location saved! 💾', 'success');
+        }
+
+        function shareCurrentLocation() {
+            const coords = document.getElementById('locationCoords').textContent;
+            const address = document.getElementById('locationAddress').textContent;
+            const text = `📍 ${address}\n🗺️ ${coords}`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Location from Pik Maps',
+                    text: text
+                });
+            } else {
+                navigator.clipboard.writeText(text).then(() => {
+                    showNotification('Location copied! 📋', 'success');
+                });
+            }
+        }
+
+        // UI Controls
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const isMobile = window.innerWidth <= 768;
+            
+            if (isMobile) {
+                sidebar.classList.toggle('mobile-open');
+            } else {
+                sidebar.classList.toggle('collapsed');
+            }
+        }
+
+        function toggleFeature(contentId) {
+            const content = document.getElementById(contentId);
+            const header = content.previousElementSibling;
+            const icon = header.querySelector('.fa-chevron-down');
+            
+            content.classList.toggle('active');
+            icon.style.transform = content.classList.contains('active') ? 'rotate(180deg)' : 'rotate(0deg)';
+        }
+
+        // Notification system
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideInRight 0.4s ease-out reverse';
+                setTimeout(() => notification.remove(), 400);
+            }, 3000);
+        }
+
+        // Event listeners
+        document.getElementById('sidebarToggle').addEventListener('click', toggleSidebar);
+        document.getElementById('locationBtn').addEventListener('click', getUserLocation);
+
+        // Initialize everything when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initMap();
+            
+            // Handle URL hash for shared locations
+            if (window.location.hash) {
+                const hash = window.location.hash.substring(1);
+                const parts = hash.split('/');
+                if (parts.length === 3) {
+                    const zoom = parseInt(parts[0]);
+                    const lat = parseFloat(parts[1]);
+                    const lng = parseFloat(parts[2]);
+                    
+                    if (!isNaN(zoom) && !isNaN(lat) && !isNaN(lng)) {
+                        map.setView([lat, lng], zoom);
+                        addMarker([lat, lng], 'Shared Location');
+                    }
+                }
+            }
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            if (map) {
+                map.invalidateSize();
+            }
+        });
+
+        // Handle location button in header
+        function getUserLocation() {
+            if (navigator.geolocation) {
+                showNotification('Getting your location...', 'info');
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        currentPosition = [lat, lng];
+                        
+                        map.setView(currentPosition, 15);
+                        
+                        // Remove old location markers
+                        map.eachLayer(layer => {
+                            if (layer.options && layer.options.className === 'pulse-marker') {
+                                map.removeLayer(layer);
+                            }
+                        });
+                        
+                        // Add new pulsing marker
+              const lat3 = position.coords.latitude.toFixed(6);
+const lng3 = position.coords.longitude.toFixed(6);
+
+const locationMarker = L.circleMarker(currentPosition, {
+    color: '#6366f1',
+    fillColor: '#a5b4fc',
+    fillOpacity: 0.8,
+    radius: 12,
+    className: 'pulse-marker'
+}).addTo(map);
+
+locationMarker.bindPopup(`📍 ${lat3}, ${lng3}`).openPopup();
+                        showNotification('Location updated! 📍', 'success');
+                    },
+                    (error) => {
+                        showNotification('Could not get your location', 'error');
+                    }
+                );
+            }
+        }
+
+        console.log('🗺️ Pik Maps Modern - Loaded successfully!');
+    </script>
+</body>
+</html>
